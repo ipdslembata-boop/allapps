@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pusat Aplikasi — Satu Pintu Ekosistem Link & Web App</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans & Inter (Estetika bersih ala Samsung One UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                        display: ['Plus Jakarta Sans', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    colors: {
+                        oneui: {
+                            bg: '#F6F7F9',
+                            card: '#FFFFFF',
+                            blue: '#1428A0',
+                            accent: '#0381FE',
+                            darkBg: '#0B0C0E',
+                            darkCard: '#16181D',
+                            darkBorder: '#252830'
+                        }
+                    },
+                    borderRadius: {
+                        'bento': '22px'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        /* Custom Scrollbar minimalis */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.35); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.6); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Bento Card Hover & Drag States */
+        .bento-card {
+            border-radius: 22px;
+            transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.22s ease, border-color 0.2s ease, opacity 0.2s ease;
+        }
+        .bento-card:hover {
+            transform: translateY(-3px);
+        }
+        .bento-card.dragging {
+            opacity: 0.45;
+            transform: scale(0.98);
+        }
+        .bento-card.drag-over {
+            border-color: #0381FE !important;
+            box-shadow: 0 0 0 2px rgba(3, 129, 254, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-oneui-bg text-slate-900 dark:bg-oneui-darkBg dark:text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-30 backdrop-blur-xl bg-white/85 dark:bg-oneui-darkCard/85 border-b border-slate-200/70 dark:border-oneui-darkBorder">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-3">
+            
+            <!-- Brand Title -->
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-2xl bg-oneui-blue text-white flex items-center justify-center shadow-sm shrink-0">
+                    <!-- Grid / Launcher SVG -->
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+                        <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+                        <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+                    </svg>
+                </div>
+                <div class="truncate">
+                    <h1 class="font-display font-bold text-base sm:text-lg tracking-tight leading-tight truncate">Pusat Aplikasi</h1>
+                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">Satu pintu untuk seluruh ekosistem aplikasi & link kerja Anda</p>
+                </div>
+            </div>
+
+            <!-- Global Search Bar (Desktop) -->
+            <div class="hidden md:flex items-center flex-1 max-w-md mx-4">
+                <div class="relative w-full">
+                    <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" id="searchInputDesktop" oninput="handleSearch(this.value)"
+                        placeholder="Cari aplikasi atau link... (tekan /)"
+                        class="w-full pl-10 pr-12 py-2 text-sm rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-transparent focus:border-slate-300 dark:focus:border-slate-600 focus:bg-white dark:focus:bg-slate-900 outline-none transition-all">
+                    <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-white dark:bg-slate-700 text-slate-400 border border-slate-200 dark:border-slate-600">/</kbd>
+                </div>
+            </div>
+
+            <!-- Right Utility Actions -->
+            <div class="flex items-center gap-2 shrink-0">
+                <!-- Export / Import Utility Menu -->
+                <div class="relative" id="utilityMenuWrap">
+                    <button onclick="toggleUtilityMenu()" title="Cadangkan / Pulihkan Data JSON"
+                        class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+
+                    <div id="utilityDropdown" class="hidden absolute right-0 mt-2 w-56 rounded-2xl bg-white dark:bg-oneui-darkCard shadow-xl border border-slate-200/80 dark:border-oneui-darkBorder py-1.5 z-50">
+                        <div class="px-3.5 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">Portabilitas Data</div>
+                        <button onclick="exportAppsJSON()" class="w-full px-3.5 py-2.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center gap-2.5">
+                            <svg class="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <span>Export JSON (Backup)</span>
+                        </button>
+                        <button onclick="document.getElementById('importJsonInput').click()" class="w-full px-3.5 py-2.5 text-left text-xs font-medium hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center gap-2.5">
+                            <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span>Import JSON (Restore)</span>
+                        </button>
+                        <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                        <button onclick="confirmResetStarter()" class="w-full px-3.5 py-2.5 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2.5">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+                            <span>Pulihkan Contoh Awal</span>
+                        </button>
+                    </div>
+                    <input type="file" id="importJsonInput" accept=".json" class="hidden" onchange="importAppsJSON(event)">
+                </div>
+
+                <!-- Dark/Light Theme Toggle -->
+                <button onclick="toggleTheme()" title="Ganti Tema Tampilan"
+                    class="p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors">
+                    <svg id="iconMoon" class="w-4 h-4 block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    <svg id="iconSun" class="w-4 h-4 hidden dark:block text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                </button>
+
+                <!-- Primary CTA: + Tambah Aplikasi -->
+                <button onclick="openAppModal()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs sm:text-sm font-semibold shadow-sm transition-all">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    <span>Tambah Aplikasi</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+        <!-- Mobile Search Bar -->
+        <div class="md:hidden mb-5">
+            <div class="relative w-full">
+                <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchInputMobile" oninput="handleSearch(this.value)"
+                    placeholder="Cari aplikasi atau link..."
+                    class="w-full pl-10 pr-4 py-2.5 text-sm rounded-2xl bg-white dark:bg-oneui-darkCard border border-slate-200/80 dark:border-oneui-darkBorder outline-none">
+            </div>
+        </div>
+
+        <!-- Category Filter Pills & Live Counter -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-7">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar" id="categoryBar">
+                <!-- Category pills rendered via JS -->
+            </div>
+
+            <div class="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400 shrink-0">
+                <span class="px-3 py-1.5 rounded-xl bg-white dark:bg-oneui-darkCard border border-slate-200/70 dark:border-oneui-darkBorder font-medium">
+                    Total: <strong id="countTotal" class="text-slate-900 dark:text-white">0</strong> Aplikasi
+                </span>
+                <span id="unconfiguredBadge" class="hidden px-3 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800/50 text-amber-700 dark:text-amber-300 font-medium">
+                    <strong id="countPending">0</strong> Perlu Edit Link
+                </span>
+            </div>
+        </div>
+
+        <!-- Pinned / Favorit Apps Section -->
+        <section id="pinnedSection" class="mb-9 hidden">
+            <div class="flex items-center justify-between mb-3.5">
+                <div class="flex items-center gap-2">
+                    <svg class="w-3.5 h-3.5 text-amber-500" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    <h2 class="font-display font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Disematkan & Prioritas</h2>
+                </div>
+                <span class="text-[11px] text-slate-400 hidden sm:inline">Geser kartu atau gunakan panah untuk mengatur urutan</span>
+            </div>
+            <div id="pinnedGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+        </section>
+
+        <!-- Regular Apps Section -->
+        <section>
+            <div class="flex items-center justify-between mb-3.5">
+                <h2 id="regularSectionTitle" class="font-display font-bold text-xs uppercase tracking-wider text-slate-500 dark:text-slate-400">Semua Aplikasi</h2>
+            </div>
+            <div id="regularGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-16 px-4 rounded-bento bg-white dark:bg-oneui-darkCard border border-dashed border-slate-300 dark:border-oneui-darkBorder">
+                <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+                </div>
+                <h3 class="font-display font-bold text-base mb-1">Tidak ada aplikasi yang cocok</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto mb-4">Ubah kata kunci pencarian atau tambahkan link aplikasi baru Anda sekarang.</p>
+                <button onclick="openAppModal()" class="px-4 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold">
+                    + Tambah Aplikasi
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 border-t border-slate-200/70 dark:border-oneui-darkBorder flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+        <span>Pusat Aplikasi • Tersimpan otomatis di browser (localStorage)</span>
+        <span>Tips: Klik kartu dengan badge <strong class="text-amber-600 dark:text-amber-400">Edit Link</strong> untuk langsung menempel URL aplikasi Anda</span>
+    </footer>
+
+    <!-- Modal: Add / Edit App Card -->
+    <div id="appModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/45 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-oneui-darkCard w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200/80 dark:border-oneui-darkBorder overflow-hidden flex flex-col max-h-[92vh]">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0">
+                <h3 id="modalHeaderTitle" class="font-display font-bold text-base">Tambah Aplikasi Baru</h3>
+                <button onclick="closeAppModal()" class="w-8 h-8 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-400">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <form id="appForm" onsubmit="handleSaveApp(event)" class="p-6 overflow-y-auto space-y-4">
+                <input type="hidden" id="editId">
+
+                <!-- Nama Aplikasi -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">Nama Aplikasi *</label>
+                    <input type="text" id="inputTitle" required placeholder="Contoh: Perjadin 5308, IG Carousel Studio"
+                        class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-oneui-accent focus:bg-white dark:focus:bg-slate-950 transition-all">
+                </div>
+
+                <!-- URL / Link Aplikasi + Tombol Tempel Clipboard -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">URL / Link Aplikasi *</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="inputUrl" required placeholder="https://nama-aplikasi.vercel.app/"
+                            class="flex-1 px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-oneui-accent focus:bg-white dark:focus:bg-slate-950 transition-all">
+                        <button type="button" onclick="pasteFromClipboard()" title="Tempel link dari Clipboard"
+                            class="px-3.5 py-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/60 dark:hover:bg-blue-900/60 text-blue-700 dark:text-blue-300 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                            <span>Tempel</span>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mt-1">Salin link dari browser Anda lalu klik tombol <strong>Tempel</strong> di sebelah kanan.</p>
+                </div>
+
+                <!-- Deskripsi Singkat -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">Deskripsi Singkat</label>
+                    <textarea id="inputDesc" rows="2" placeholder="Catatan singkat fungsi aplikasi ini (1-2 baris)..."
+                        class="w-full px-3.5 py-2 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-oneui-accent focus:bg-white dark:focus:bg-slate-950 resize-none transition-all"></textarea>
+                </div>
+
+                <!-- Kategori & Warna Aksen -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5">Kategori</label>
+                        <select id="inputCategory"
+                            class="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 outline-none focus:border-oneui-accent">
+                            <option value="Operasional & BPS">Operasional & BPS</option>
+                            <option value="Konten & Kreatif">Konten & Kreatif</option>
+                            <option value="Data & Tools">Data & Tools</option>
+                            <option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold mb-1.5">Warna Aksen</label>
+                        <div class="flex items-center justify-between gap-1.5 p-1.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700" id="colorPickerGroup">
+                            <!-- Color swatches rendered via JS -->
+                        </div>
+                        <input type="hidden" id="inputColor" value="blue">
+                    </div>
+                </div>
+
+                <!-- Pilih Ikon SVG Minimalis -->
+                <div>
+                    <label class="block text-xs font-semibold mb-1.5">Pilih Ikon Aplikasi</label>
+                    <div class="grid grid-cols-8 gap-2" id="iconPickerGroup">
+                        <!-- Icon options rendered via JS -->
+                    </div>
+                    <input type="hidden" id="inputIcon" value="briefcase">
+                </div>
+
+                <!-- Pin / Favorit Toggle -->
+                <div class="pt-1">
+                    <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+                        <input type="checkbox" id="inputPinned" class="w-4 h-4 rounded accent-oneui-blue">
+                        <span class="text-xs font-medium text-slate-700 dark:text-slate-300">Sematkan di bagian paling atas (Favorit)</span>
+                    </label>
+                </div>
+
+                <!-- Footer Buttons -->
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeAppModal()"
+                        class="px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 shadow-sm transition-colors">
+                        Simpan Aplikasi
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: In-App Embedded Viewer (Iframe Drawer) -->
+    <div id="previewModal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950/80 backdrop-blur-md">
+        <!-- Top Viewer Header -->
+        <div class="h-14 bg-white dark:bg-oneui-darkCard border-b border-slate-200 dark:border-oneui-darkBorder px-4 flex items-center justify-between shrink-0 gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <button onclick="closePreviewModal()"
+                    class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-semibold flex items-center gap-1.5 shrink-0">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                    <span>Kembali</span>
+                </button>
+                <div class="h-4 w-[1px] bg-slate-200 dark:bg-slate-700 shrink-0"></div>
+                <span id="previewTitle" class="font-display font-bold text-sm truncate">Nama Aplikasi</span>
+                <span id="previewUrlLabel" class="hidden md:inline-block text-xs text-slate-400 truncate max-w-xs"></span>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <a id="previewFallbackBtn" href="#" target="_blank" rel="noopener noreferrer"
+                    class="px-3.5 py-1.5 rounded-xl bg-oneui-blue hover:bg-blue-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm">
+                    <span>Buka di Tab Baru</span>
+                    <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                </a>
+                <button onclick="closePreviewModal()" title="Tutup Pratinjau"
+                    class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Subtle Info Banner for X-Frame-Options Notice -->
+        <div class="bg-slate-100 dark:bg-slate-900 px-4 py-1.5 text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between border-b border-slate-200/70 dark:border-slate-800 shrink-0">
+            <span>Mode Pratinjau Terintegrasi • Jika halaman tidak tampil karena kebijakan keamanan situs (X-Frame-Options), klik <strong>Buka di Tab Baru</strong>.</span>
+        </div>
+
+        <!-- Iframe Body -->
+        <div class="flex-1 bg-white dark:bg-slate-950 relative">
+            <iframe id="previewIframe" class="w-full h-full border-0" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"></iframe>
+        </div>
+    </div>
+
+    <!-- Modal: Custom Confirm Dialog (Pengganti confirm() bawaan browser) -->
+    <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/45 backdrop-blur-sm p-4">
+        <div class="bg-white dark:bg-oneui-darkCard w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-oneui-darkBorder">
+            <h3 id="confirmTitle" class="font-display font-bold text-base mb-1.5">Konfirmasi</h3>
+            <p id="confirmDesc" class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Apakah Anda yakin?</p>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700">
+                    Batal
+                </button>
+                <button id="confirmActionBtn" class="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white">
+                    Ya, Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toastNotification" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="px-4 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold shadow-xl flex items-center gap-2.5">
+            <svg class="w-4 h-4 text-emerald-400 dark:text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span id="toastText">Berhasil</span>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'app_hub_5308_data';
+        const THEME_STORAGE_KEY = 'app_hub_5308_theme';
+
+        const CATEGORIES = ['Semua', 'Operasional & BPS', 'Konten & Kreatif', 'Data & Tools', 'Lainnya'];
+
+        const COLOR_MAP = {
+            blue: {
+                swatch: 'bg-blue-600',
+                iconWrap: 'bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400',
+                badge: 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300'
+            },
+            emerald: {
+                swatch: 'bg-emerald-600',
+                iconWrap: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400',
+                badge: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300'
+            },
+            violet: {
+                swatch: 'bg-violet-600',
+                iconWrap: 'bg-violet-50 text-violet-600 dark:bg-violet-950/60 dark:text-violet-400',
+                badge: 'bg-violet-50 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300'
+            },
+            amber: {
+                swatch: 'bg-amber-500',
+                iconWrap: 'bg-amber-50 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400',
+                badge: 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300'
+            },
+            rose: {
+                swatch: 'bg-rose-600',
+                iconWrap: 'bg-rose-50 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400',
+                badge: 'bg-rose-50 text-rose-700 dark:bg-rose-950/50 dark:text-rose-300'
+            },
+            slate: {
+                swatch: 'bg-slate-700',
+                iconWrap: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300',
+                badge: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+            }
+        };
+
+        // Pure Inline SVG Icon Set (Zero External Icon Dependency)
+        const SVG_ICONS = {
+            briefcase: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
+            layers: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>',
+            chart: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>',
+            sparkles: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1M5.6 18.4l2.1-2.1m8.6-8.6l2.1-2.1"></path></svg>',
+            globe: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>',
+            folder: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>',
+            table: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line><line x1="9" y1="9" x2="9" y2="21"></line></svg>',
+            camera: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>'
+        };
+
+        // Pre-populated Starter Apps
+        const STARTER_APPS = [
+            {
+                id: 'starter-perjadin-5308',
+                title: 'Perjadin 5308',
+                url: 'https://perjadin5308.vercel.app/',
+                description: 'Aplikasi manajemen, pencatatan, dan kalkulasi anggaran perjalanan dinas lingkup BPS Kabupaten Lembata (5308).',
+                category: 'Operasional & BPS',
+                icon: 'briefcase',
+                color: 'blue',
+                pinned: true
+            },
+            {
+                id: 'starter-fasih-sm',
+                title: 'FASIH SM BPS',
+                url: 'https://fasih-sm.bps.go.id/',
+                description: 'Sistem pendataan lapangan dan manajemen sampel survei BPS berbasis web.',
+                category: 'Data & Tools',
+                icon: 'chart',
+                color: 'emerald',
+                pinned: true
+            },
+            {
+                id: 'starter-ig-storytelling',
+                title: 'IG Storytelling 4:5',
+                url: '#',
+                description: 'Studio pembuat slide carousel Instagram 4:5 bergaya Samsung minimalis dengan auto-bold & auto-save.',
+                category: 'Konten & Kreatif',
+                icon: 'layers',
+                color: 'violet',
+                pinned: true
+            },
+            {
+                id: 'starter-sigadis',
+                title: 'SIGADIS Lembata',
+                url: '#',
+                description: 'Sistem informasi & layanan administrasi internal. Klik kartu ini untuk menempelkan link aktif Anda.',
+                category: 'Operasional & BPS',
+                icon: 'folder',
+                color: 'amber',
+                pinned: false
+            },
+            {
+                id: 'starter-sikopi',
+                title: 'SiKoPI',
+                url: '#',
+                description: 'Sistem koordinasi dan pelaporan kegiatan internal. Klik kartu ini untuk mengedit link.',
+                category: 'Operasional & BPS',
+                icon: 'globe',
+                color: 'rose',
+                pinned: false
+            }
+        ];
+
+        let appsList = [];
+        let selectedCategory = 'Semua';
+        let searchTerm = '';
+        let draggedAppId = null;
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadStoredApps();
+            renderModalPickers();
+            renderAll();
+            setupKeyboardShortcuts();
+            setupOutsideClickHandlers();
+        });
+
+        function initTheme() {
+            const saved = localStorage.getItem(THEME_STORAGE_KEY);
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (saved === 'dark' || (!saved && systemDark)) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+        }
+
+        function loadStoredApps() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                try {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        appsList = parsed;
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Gagal membaca localStorage:', e);
+                }
+            }
+            appsList = JSON.parse(JSON.stringify(STARTER_APPS));
+            persistApps();
+        }
+
+        function persistApps() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appsList));
+        }
+
+        function isPlaceholderUrl(url) {
+            if (!url) return true;
+            const trimmed = url.trim();
+            return trimmed === '' || trimmed === '#';
+        }
+
+        function normalizeUrl(url) {
+            if (!url) return '#';
+            const trimmed = url.trim();
+            if (trimmed === '' || trimmed === '#') return '#';
+            if (!/^https?:\/\//i.test(trimmed)) {
+                return 'https://' + trimmed;
+            }
+            return trimmed;
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // Render Category Pills & Grids
+        function renderAll() {
+            renderCategoryPills();
+            renderGrids();
+        }
+
+        function renderCategoryPills() {
+            const bar = document.getElementById('categoryBar');
+            bar.innerHTML = CATEGORIES.map(cat => {
+                const active = cat === selectedCategory;
+                return `
+                    <button onclick="selectCategory('${cat}')"
+                        class="px-3.5 py-2 rounded-2xl text-xs font-semibold whitespace-nowrap transition-all ${
+                            active
+                                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-sm'
+                                : 'bg-white dark:bg-oneui-darkCard text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-oneui-darkBorder hover:border-slate-300 dark:hover:border-slate-700'
+                        }">
+                        ${cat}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectCategory(cat) {
+            selectedCategory = cat;
+            renderAll();
+        }
+
+        function handleSearch(val) {
+            searchTerm = val.toLowerCase().trim();
+            document.getElementById('searchInputDesktop').value = val;
+            document.getElementById('searchInputMobile').value = val;
+            renderGrids();
+        }
+
+        function renderGrids() {
+            const filtered = appsList.filter(app => {
+                const matchCat = selectedCategory === 'Semua' || app.category === selectedCategory;
+                const matchQuery = !searchTerm ||
+                    app.title.toLowerCase().includes(searchTerm) ||
+                    (app.description && app.description.toLowerCase().includes(searchTerm)) ||
+                    (app.url && app.url.toLowerCase().includes(searchTerm)) ||
+                    app.category.toLowerCase().includes(searchTerm);
+                return matchCat && matchQuery;
+            });
+
+            const pinned = filtered.filter(a => a.pinned);
+            const regular = filtered.filter(a => !a.pinned);
+
+            // Counters
+            document.getElementById('countTotal').innerText = appsList.length;
+            const pendingCount = appsList.filter(a => isPlaceholderUrl(a.url)).length;
+            const unconfiguredBadge = document.getElementById('unconfiguredBadge');
+            if (pendingCount > 0) {
+                unconfiguredBadge.classList.remove('hidden');
+                document.getElementById('countPending').innerText = pendingCount;
+            } else {
+                unconfiguredBadge.classList.add('hidden');
+            }
+
+            // Pinned Section
+            const pinnedSec = document.getElementById('pinnedSection');
+            const pinnedGrid = document.getElementById('pinnedGrid');
+            if (pinned.length > 0) {
+                pinnedSec.classList.remove('hidden');
+                pinnedGrid.innerHTML = pinned.map(app => buildCardHTML(app)).join('');
+            } else {
+                pinnedSec.classList.add('hidden');
+            }
+
+            // Regular Section
+            const regularGrid = document.getElementById('regularGrid');
+            const emptyState = document.getElementById('emptyState');
+            document.getElementById('regularSectionTitle').innerText = pinned.length > 0 ? 'Aplikasi Lainnya' : 'Semua Aplikasi';
+
+            if (filtered.length === 0) {
+                regularGrid.innerHTML = '';
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                regularGrid.innerHTML = regular.map(app => buildCardHTML(app)).join('');
+            }
+        }
+
+        function buildCardHTML(app) {
+            const theme = COLOR_MAP[app.color] || COLOR_MAP.blue;
+            const iconSvg = SVG_ICONS[app.icon] || SVG_ICONS.briefcase;
+            const needsLink = isPlaceholderUrl(app.url);
+            const displayUrl = needsLink ? 'Link belum diatur — klik untuk tempel URL' : app.url.replace(/^https?:\/\//i, '').replace(/\/$/, '');
+
+            return `
+                <div class="bento-card group bg-white dark:bg-oneui-darkCard border ${needsLink ? 'border-amber-300/80 dark:border-amber-700/60' : 'border-slate-200/80 dark:border-oneui-darkBorder'} shadow-sm hover:shadow-md p-5 flex flex-col justify-between cursor-pointer"
+                    draggable="true"
+                    data-id="${app.id}"
+                    ondragstart="onDragStart(event, '${app.id}')"
+                    ondragover="onDragOver(event)"
+                    ondragleave="onDragLeave(event)"
+                    ondrop="onDrop(event, '${app.id}')"
+                    ondragend="onDragEnd(event)"
+                    onclick="handleCardPrimaryClick('${app.id}')">
+
+                    <div>
+                        <!-- Header Row: Icon + Status/Order Controls -->
+                        <div class="flex items-start justify-between gap-2 mb-4">
+                            <div class="w-12 h-12 rounded-2xl ${theme.iconWrap} flex items-center justify-center shrink-0">
+                                ${iconSvg}
+                            </div>
+
+                            <!-- Reorder & Pin Controls -->
+                            <div class="flex items-center gap-0.5 opacity-95 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" onclick="event.stopPropagation()">
+                                <button onclick="moveAppOrder('${app.id}', -1)" title="Geser ke kiri / atas"
+                                    class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                </button>
+                                <button onclick="moveAppOrder('${app.id}', 1)" title="Geser ke kanan / bawah"
+                                    class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                </button>
+                                <button onclick="togglePinApp('${app.id}')" title="${app.pinned ? 'Lepas Sematan' : 'Sematkan di Atas'}"
+                                    class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 ${app.pinned ? 'text-amber-500' : 'text-slate-400 hover:text-slate-700'}">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="${app.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Category & Edit Link Badge -->
+                        <div class="flex items-center flex-wrap gap-1.5 mb-2">
+                            <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-lg ${theme.badge}">
+                                ${escapeHTML(app.category)}
+                            </span>
+                            ${needsLink ? `
+                                <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-lg bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-200">
+                                    Edit Link
+                                </span>
+                            ` : ''}
+                        </div>
+
+                        <!-- Title, URL Preview & Description -->
+                        <h3 class="font-display font-bold text-base text-slate-900 dark:text-white leading-snug mb-1 truncate">${escapeHTML(app.title)}</h3>
+                        <p class="text-[11px] font-medium ${needsLink ? 'text-amber-600 dark:text-amber-400' : 'text-slate-400'} truncate mb-2.5">${escapeHTML(displayUrl)}</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-5">${escapeHTML(app.description || 'Tidak ada deskripsi singkat.')}</p>
+                    </div>
+
+                    <!-- Card Action Footer -->
+                    <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-1.5" onclick="event.stopPropagation()">
+                        ${needsLink ? `
+                            <button onclick="openAppModal('${app.id}')"
+                                class="flex-1 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 1 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                <span>Tempel Link Sekarang</span>
+                            </button>
+                        ` : `
+                            <a href="${escapeHTML(app.url)}" target="_blank" rel="noopener noreferrer"
+                                class="flex-1 py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-200 text-white dark:text-slate-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+                                <span>Buka</span>
+                                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                            </a>
+                            <button onclick="openPreviewModal('${app.id}')" title="Buka Pratinjau di Dalam Aplikasi"
+                                class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            </button>
+                            <button onclick="copyAppLink('${app.id}')" title="Salin Link"
+                                class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+                                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                            </button>
+                        `}
+
+                        <!-- Edit & Delete Buttons -->
+                        <button onclick="openAppModal('${app.id}')" title="Edit Aplikasi"
+                            class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 1 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                        </button>
+                        <button onclick="requestDeleteApp('${app.id}')" title="Hapus Aplikasi"
+                            class="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-950/50 text-slate-500 hover:text-rose-600 transition-colors">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Card Primary Click Handler
+        function handleCardPrimaryClick(id) {
+            const app = appsList.find(a => a.id === id);
+            if (!app) return;
+
+            if (isPlaceholderUrl(app.url)) {
+                openAppModal(id);
+            } else {
+                window.open(app.url, '_blank', 'noopener,noreferrer');
+            }
+        }
+
+        // Clipboard Copy & Paste Helpers
+        function copyAppLink(id) {
+            const app = appsList.find(a => a.id === id);
+            if (!app || isPlaceholderUrl(app.url)) {
+                showToast('Link belum diatur');
+                return;
+            }
+
+            const tempInput = document.createElement('input');
+            tempInput.value = app.url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            showToast(`Link "${app.title}" disalin!`);
+        }
+
+        async function pasteFromClipboard() {
+            const urlInput = document.getElementById('inputUrl');
+            try {
+                if (navigator.clipboard && navigator.clipboard.readText) {
+                    const text = await navigator.clipboard.readText();
+                    if (text) {
+                        urlInput.value = text.trim();
+                        urlInput.focus();
+                        showToast('Link berhasil ditempel dari clipboard');
+                        return;
+                    }
+                }
+            } catch (err) {
+                // Fallback jika izin clipboard dibatasi iframe
+            }
+            urlInput.focus();
+            showToast('Tekan Ctrl+V (atau Tempel) di kolom URL');
+        }
+
+        // Drag-and-Drop Reordering
+        function onDragStart(e, id) {
+            draggedAppId = id;
+            e.currentTarget.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function onDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function onDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function onDrop(e, targetId) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            if (!draggedAppId || draggedAppId === targetId) return;
+
+            const fromIdx = appsList.findIndex(a => a.id === draggedAppId);
+            const toIdx = appsList.findIndex(a => a.id === targetId);
+            if (fromIdx === -1 || toIdx === -1) return;
+
+            const [movedItem] = appsList.splice(fromIdx, 1);
+            appsList.splice(toIdx, 0, movedItem);
+            persistApps();
+            renderGrids();
+            showToast('Urutan aplikasi diperbarui');
+        }
+
+        function onDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            document.querySelectorAll('.bento-card').forEach(el => el.classList.remove('drag-over'));
+            draggedAppId = null;
+        }
+
+        function moveAppOrder(id, delta) {
+            const idx = appsList.findIndex(a => a.id === id);
+            if (idx === -1) return;
+            const targetIdx = idx + delta;
+            if (targetIdx < 0 || targetIdx >= appsList.length) return;
+
+            const temp = appsList[idx];
+            appsList[idx] = appsList[targetIdx];
+            appsList[targetIdx] = temp;
+            persistApps();
+            renderGrids();
+        }
+
+        function togglePinApp(id) {
+            const app = appsList.find(a => a.id === id);
+            if (!app) return;
+            app.pinned = !app.pinned;
+            persistApps();
+            renderGrids();
+            showToast(app.pinned ? `"${app.title}" disematkan di atas` : `Sematan "${app.title}" dilepas`);
+        }
+
+        // Add / Edit Modal Logic
+        function renderModalPickers() {
+            // Color swatches
+            const colorGroup = document.getElementById('colorPickerGroup');
+            colorGroup.innerHTML = Object.keys(COLOR_MAP).map(key => `
+                <button type="button" onclick="selectModalColor('${key}')" data-color="${key}"
+                    class="color-opt w-6 h-6 rounded-full ${COLOR_MAP[key].swatch} transition-transform hover:scale-110 ring-offset-2 dark:ring-offset-slate-900">
+                </button>
+            `).join('');
+
+            // Icon buttons
+            const iconGroup = document.getElementById('iconPickerGroup');
+            iconGroup.innerHTML = Object.keys(SVG_ICONS).map(key => `
+                <button type="button" onclick="selectModalIcon('${key}')" data-icon="${key}"
+                    class="icon-opt h-9 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                    ${SVG_ICONS[key]}
+                </button>
+            `).join('');
+        }
+
+        function selectModalColor(colorKey) {
+            document.getElementById('inputColor').value = colorKey;
+            document.querySelectorAll('.color-opt').forEach(btn => {
+                const active = btn.dataset.color === colorKey;
+                btn.classList.toggle('ring-2', active);
+                btn.classList.toggle('ring-slate-900', active);
+                btn.classList.toggle('dark:ring-white', active);
+                btn.classList.toggle('scale-110', active);
+            });
+        }
+
+        function selectModalIcon(iconKey) {
+            document.getElementById('inputIcon').value = iconKey;
+            document.querySelectorAll('.icon-opt').forEach(btn => {
+                const active = btn.dataset.icon === iconKey;
+                btn.classList.toggle('bg-slate-900', active);
+                btn.classList.toggle('text-white', active);
+                btn.classList.toggle('dark:bg-white', active);
+                btn.classList.toggle('dark:text-slate-900', active);
+                btn.classList.toggle('border-transparent', active);
+            });
+        }
+
+        function openAppModal(editId = null) {
+            const modal = document.getElementById('appModal');
+            document.getElementById('appForm').reset();
+
+            if (editId) {
+                const app = appsList.find(a => a.id === editId);
+                if (!app) return;
+                document.getElementById('modalHeaderTitle').innerText = 'Edit Aplikasi & Link';
+                document.getElementById('editId').value = app.id;
+                document.getElementById('inputTitle').value = app.title;
+                document.getElementById('inputUrl').value = app.url === '#' ? '' : app.url;
+                document.getElementById('inputDesc').value = app.description || '';
+                document.getElementById('inputCategory').value = app.category;
+                document.getElementById('inputPinned').checked = !!app.pinned;
+                selectModalColor(app.color || 'blue');
+                selectModalIcon(app.icon || 'briefcase');
+            } else {
+                document.getElementById('modalHeaderTitle').innerText = 'Tambah Aplikasi Baru';
+                document.getElementById('editId').value = '';
+                document.getElementById('inputCategory').value = selectedCategory !== 'Semua' ? selectedCategory : 'Operasional & BPS';
+                document.getElementById('inputPinned').checked = false;
+                selectModalColor('blue');
+                selectModalIcon('briefcase');
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                if (editId && isPlaceholderUrl(appsList.find(a => a.id === editId)?.url)) {
+                    document.getElementById('inputUrl').focus();
+                } else {
+                    document.getElementById('inputTitle').focus();
+                }
+            }, 60);
+        }
+
+        function closeAppModal() {
+            const modal = document.getElementById('appModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function handleSaveApp(e) {
+            e.preventDefault();
+            const editId = document.getElementById('editId').value;
+            const title = document.getElementById('inputTitle').value.trim();
+            const rawUrl = document.getElementById('inputUrl').value.trim();
+            const url = normalizeUrl(rawUrl);
+            const description = document.getElementById('inputDesc').value.trim();
+            const category = document.getElementById('inputCategory').value;
+            const color = document.getElementById('inputColor').value;
+            const icon = document.getElementById('inputIcon').value;
+            const pinned = document.getElementById('inputPinned').checked;
+
+            if (!title) return;
+
+            if (editId) {
+                const idx = appsList.findIndex(a => a.id === editId);
+                if (idx !== -1) {
+                    appsList[idx] = { ...appsList[idx], title, url, description, category, color, icon, pinned };
+                    showToast(`"${title}" berhasil diperbarui`);
+                }
+            } else {
+                appsList.unshift({
+                    id: 'app-' + Date.now(),
+                    title,
+                    url,
+                    description,
+                    category,
+                    color,
+                    icon,
+                    pinned
+                });
+                showToast(`"${title}" ditambahkan ke Pusat Aplikasi`);
+            }
+
+            persistApps();
+            renderAll();
+            closeAppModal();
+        }
+
+        // Delete & Reset with Custom Confirm Modal
+        let pendingConfirmCallback = null;
+
+        function openConfirmModal(title, desc, onConfirm) {
+            document.getElementById('confirmTitle').innerText = title;
+            document.getElementById('confirmDesc').innerText = desc;
+            pendingConfirmCallback = onConfirm;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            pendingConfirmCallback = null;
+        }
+
+        document.getElementById('confirmActionBtn').addEventListener('click', () => {
+            if (typeof pendingConfirmCallback === 'function') {
+                pendingConfirmCallback();
+            }
+            closeConfirmModal();
+        });
+
+        function requestDeleteApp(id) {
+            const app = appsList.find(a => a.id === id);
+            if (!app) return;
+            openConfirmModal(
+                'Hapus Aplikasi?',
+                `Aplikasi "${app.title}" akan dihapus dari daftar portal Anda.`,
+                () => {
+                    appsList = appsList.filter(a => a.id !== id);
+                    persistApps();
+                    renderAll();
+                    showToast(`"${app.title}" dihapus`);
+                }
+            );
+        }
+
+        function confirmResetStarter() {
+            toggleUtilityMenu(false);
+            openConfirmModal(
+                'Pulihkan Contoh Awal?',
+                'Daftar saat ini akan diganti dengan daftar contoh bawaan (Perjadin 5308, FASIH SM, IG Storytelling, dll).',
+                () => {
+                    appsList = JSON.parse(JSON.stringify(STARTER_APPS));
+                    persistApps();
+                    renderAll();
+                    showToast('Daftar contoh awal dipulihkan');
+                }
+            );
+        }
+
+        // In-App Iframe Preview Drawer
+        function openPreviewModal(id) {
+            const app = appsList.find(a => a.id === id);
+            if (!app || isPlaceholderUrl(app.url)) {
+                openAppModal(id);
+                return;
+            }
+
+            document.getElementById('previewTitle').innerText = app.title;
+            document.getElementById('previewUrlLabel').innerText = app.url;
+            document.getElementById('previewFallbackBtn').href = app.url;
+            document.getElementById('previewIframe').src = app.url;
+
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closePreviewModal() {
+            const modal = document.getElementById('previewModal');
+            document.getElementById('previewIframe').src = 'about:blank';
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        // Export & Import JSON Backup
+        function toggleUtilityMenu(forceState = null) {
+            const menu = document.getElementById('utilityDropdown');
+            if (forceState === false) {
+                menu.classList.add('hidden');
+            } else {
+                menu.classList.toggle('hidden');
+            }
+        }
+
+        function exportAppsJSON() {
+            toggleUtilityMenu(false);
+            const dataStr = JSON.stringify(appsList, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const dateStamp = new Date().toISOString().slice(0, 10);
+            a.href = url;
+            a.download = `pusat-aplikasi-backup-${dateStamp}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('File backup JSON berhasil diunduh');
+        }
+
+        function importAppsJSON(event) {
+            toggleUtilityMenu(false);
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (Array.isArray(imported) && imported.length > 0) {
+                        appsList = imported;
+                        persistApps();
+                        renderAll();
+                        showToast(`Berhasil memulihkan ${imported.length} aplikasi`);
+                    } else {
+                        showToast('Format file JSON tidak valid');
+                    }
+                } catch (err) {
+                    showToast('Gagal membaca file JSON');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Keyboard Shortcuts & Outside Clicks
+        function setupKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                const tag = document.activeElement.tagName;
+                const isInputFocused = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+                if ((e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k')) && !isInputFocused) {
+                    e.preventDefault();
+                    const desktopSearch = document.getElementById('searchInputDesktop');
+                    const mobileSearch = document.getElementById('searchInputMobile');
+                    if (window.innerWidth >= 768) {
+                        desktopSearch.focus();
+                    } else {
+                        mobileSearch.focus();
+                    }
+                } else if (e.key === 'Escape') {
+                    closeAppModal();
+                    closePreviewModal();
+                    closeConfirmModal();
+                    toggleUtilityMenu(false);
+                }
+            });
+        }
+
+        function setupOutsideClickHandlers() {
+            document.addEventListener('click', (e) => {
+                const wrap = document.getElementById('utilityMenuWrap');
+                if (wrap && !wrap.contains(e.target)) {
+                    toggleUtilityMenu(false);
+                }
+            });
+        }
+
+        // Toast Feedback
+        let toastTimer = null;
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            document.getElementById('toastText').innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2600);
+        }
+    </script>
+</body>
+</html>
